@@ -1,5 +1,9 @@
 
-
+import org.scalajs.sbtplugin.JSModuleID
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import org.scalajs.sbtplugin.cross.CrossProject
+import sbt._
+import sbt.Keys._
 object StylesAndScriptsDependencies {
 
 
@@ -17,11 +21,9 @@ object StylesAndScriptsDependencies {
     val                  webjarl4js   =        "org.webjars"                                         %    "log4javascript"                        % version.log4js     / "js/log4javascript_uncompressed.js" minified "js/log4javascript.js"
     val                  webjard3js   =        "org.webjars"                                         %    "d3js"                                  % version.d3         / "d3.js"
     val                  webjarclnm   =        "org.webjars.bower"                                   %    "classnames"                            % version.classnames / s"${version.classnames}/index.js"
-    val                  webjarelem   =        "org.webjars.bower"                                   %    "elemental-dist"                        % version.element    / "elemental.js"                     dependsOn "2.2.0/index.js"
     val                         rjs   =        "org.webjars"                                         %    "requirejs"                             % version.rjs        / "require.js"
-    //val                  webjarradi   =        "org.webjars.npm"                                     %    "radium"                                % version.radium     / "radium.js"
 
-    def apply() = Seq(webjarl4js, webjarReact2, webjarReact, webjarjq, webjard3js, webjarchart, webjarbs, webjarelem, webjarclnm, rjs)
+    def apply() = Seq(webjarl4js, webjarReact2, webjarReact, webjarjq, webjard3js, webjarchart, webjarbs, webjarclnm, rjs)
   }
 
   private object version {

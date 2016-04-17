@@ -17,46 +17,60 @@ object ScalaJsDependencies {
   //      ACHTUNG! ACHTUNG! YOU HAVE TO WRAP EM IN THAT SORT OF FORMAT SO THEY DONT START DOWNLOADING. CAN NVER TRUST MACROZ
   //
 
-
-  private def djs(group: String, art: String, v: String) = Def.SettingsDefinition.wrapSettingsDefinition(libraryDependencies += group %%% art % v)
-  private def djsp(group: String, art: String, v: String, p: String = "default") = Def.SettingsDefinition.wrapSettingsDefinition(libraryDependencies += group %%% art % v % p )
-  //private def smg(modules: ModuleID*)(setting: Def.Initialize[Def.Setting[Seq[sbt.ModuleID]]]*) = Def.settings(libraryDependencies ++= modules:_*, setting)
-
+  trait AwkwardlyWrapsScalaJsDependenciesSoYouCanAggregateThem {
+    def toDef(): Def.SettingsDefinition
+  }
+  
+  case class Sjs(org: String, sjsartifact: String, v: String) extends AwkwardlyWrapsScalaJsDependenciesSoYouCanAggregateThem {
+    override def toDef(): Def.SettingsDefinition = Def.SettingsDefinition.wrapSettingsDefinition(
+      libraryDependencies += org %%% sjsartifact % v
+    )
+    
+    def +(sjs: Sjs) = Sjses(this, sjs)
+  }
+  
+  case class Sjses(sjs: Sjs*) extends AwkwardlyWrapsScalaJsDependenciesSoYouCanAggregateThem {
+    override def toDef(): Def.SettingsDefinition = Def.SettingsDefinition.wrapSettingsDefinition(
+      libraryDependencies ++= sjs.map { s ⇒
+          s.org %%% s.sjsartifact % s.v
+      }
+    )
+    
+    def ++(eses: Sjs*) = Sjses((this.sjs.toSeq ++ eses.toSeq):_*)
+  }
+  
   object JsDependencies {
 
-    val                   jsprickle   = djs(  "com.github.benhutchison"                              ,   "prickle"                                , version.prickle                    )
-    val                  jboopickle   = djs(   "me.chrons"                                           ,    "boopickle"                             , version.booPickle                  )
-    val                    autowire   = djs(   "com.lihaoyi"                                         ,    "autowire"                              , version.autowire                   )
-    val                    upickler   = djs(   "com.lihaoyi"                                         ,    "upickle"                               , version.upickle                    )
-    val                      zzzzzz   = djs(   "org.scalaz"                                          ,    "scalaz-core"                           , version.scalaz                     )
-    //val                      moment   = djs(   "io.github.widok"                                     ,    "scala-js-moment"                       , version.scalajsMoment              )
-    val                    monocle1   = djs(   "com.github.japgolly.fork.monocle"                    ,    "monocle-core"                          , version.monocle                    )
-    val                    monocle2   = djs(   "com.github.japgolly.fork.monocle"                    ,    "monocle-macro"                         , version.monocle                    )
-    val                       monix   = djs(   "io.monix"                                            ,    "monix-reactive"                        , version.monix                      )
-    val                   shapeless   = djs(   "com.chuusai"                                         ,    "shapeless"                             , version.shapeless                  )
-    val                  parboiled2   = djs(   "com.github.karasiq"                                  ,    "parboiled"                             , version.parboiled                  )
-    val                         dom   = djs(   "org.scala-js"                                        ,    "scalajs-dom"                           , version.scalajsDom                 )
-    val                   scalatags   = djs(   "com.lihaoyi"                                         ,    "scalatags"                             , version.scalatags                  )
-    val                    slogging   = djs(   "biz.enef"                                            ,    "slogging"                              , version.slogging                   )
-    val                       diode   = djs(   "me.chrons"                                           ,    "diode"                                 , version.diode                      )
-    val                  diodereact   = djs(   "me.chrons"                                           ,    "diode-react"                           , version.diode                      )
-    val               scalajsJquery   = djs(   "be.doeraene"                                         ,    "scalajs-jquery"                        , version.scalajsJquery              )
-    val                          d3   = djs(   "org.singlespaced"                                    ,    "scalajs-d3"                            , version.scalajsD3                  )
-    val                  scalaReact   = djs(   "com.github.japgolly.scalajs-react"                   ,    "core"                                  , version.scalaJsReact               )
-    val             scalaReactExtra   = djs(   "com.github.japgolly.scalajs-react"                   ,    "extra"                                 , version.scalaJsReact               )
-    val                scalaReact72   = djs(   "com.github.japgolly.scalajs-react"                   ,    "ext-scalaz72"                          , version.scalaJsReact               )
-    val              scalaReactExtm   = djs(   "com.github.japgolly.scalajs-react"                   ,    "ext-monocle"                           , version.scalaJsReact               )
-    val                scalaCssCore   = djs(   "com.github.japgolly.scalacss"                        ,    "core"                                  , version.scalaCss                   )
-    val                scalaCssExtR   = djs(   "com.github.japgolly.scalacss"                        ,    "ext-react"                             , version.scalaCss                   )
-    val                     videojs   = djs(   "com.github.karasiq"                                  ,    "scalajs-videojs"                       , version.scalaJsVideo               )
-    val                    markedjs   = djs(   "com.github.karasiq"                                  ,    "scalajs-marked"                        , version.scalajsMarked              )
-    val                    momentjs   = djs(   "io.github.widok"                                     ,    "scala-js-momentjs"                     , version.scalajsMoment              )
-    val                   bindingJs   = djs(   "org.denigma"                                         ,    "binding"                               , version.scalaJsBinding             )
-    val                 scaladgetjs   = djs(   "fr.iscpif"                                           ,    "scaladget"                             , version.scaladget                  )
-    val                 reactocomps   = djs(   "com.github.chandu0101.scalajs-react-components"      ,    "core"                                  , version.reactComps                 )
-    val                fontAwesomeP   = djsp(   "org.webjars"                                         ,    "font-awesome"                          , version.fa, "Provided"                   )
-    val                   bootsrapP   = djsp(   "org.webjars"                                         ,    "bootstrap"                             , version.bootstrap, "Provided"            )
-
+    val                   jsprickle   = Sjs(  "com.github.benhutchison"                              ,   "prickle"                                , version.prickle                    )
+    val                  jboopickle   = Sjs(   "me.chrons"                                           ,    "boopickle"                             , version.booPickle                  )
+    val                    autowire   = Sjs(   "com.lihaoyi"                                         ,    "autowire"                              , version.autowire                   )
+    val                    upickler   = Sjs(   "com.lihaoyi"                                         ,    "upickle"                               , version.upickle                    )
+    val                      zzzzzz   = Sjs(   "org.scalaz"                                          ,    "scalaz-core"                           , version.scalaz                     )
+    val                    monocle1   = Sjs(   "com.github.japgolly.fork.monocle"                    ,    "monocle-core"                          , version.monocle                    )
+    val                    monocle2   = Sjs(   "com.github.japgolly.fork.monocle"                    ,    "monocle-macro"                         , version.monocle                    )
+    val                       monix   = Sjs(   "io.monix"                                            ,    "monix-reactive"                        , version.monix                      )
+    val                   shapeless   = Sjs(   "com.chuusai"                                         ,    "shapeless"                             , version.shapeless                  )
+    val                  parboiled2   = Sjs(   "com.github.karasiq"                                  ,    "parboiled"                             , version.parboiled                  )
+    val                         dom   = Sjs(   "org.scala-js"                                        ,    "scalajs-dom"                           , version.scalajsDom                 )
+    val                   scalatags   = Sjs(   "com.lihaoyi"                                         ,    "scalatags"                             , version.scalatags                  )
+    val                    slogging   = Sjs(   "biz.enef"                                            ,    "slogging"                              , version.slogging                   )
+    val                       diode   = Sjs(   "me.chrons"                                           ,    "diode"                                 , version.diode                      )
+    val                  diodereact   = Sjs(   "me.chrons"                                           ,    "diode-react"                           , version.diode                      )
+    val               scalajsJquery   = Sjs(   "be.doeraene"                                         ,    "scalajs-jquery"                        , version.scalajsJquery              )
+    val                          d3   = Sjs(   "org.singlespaced"                                    ,    "scalajs-d3"                            , version.scalajsD3                  )
+    val                  scalaReact   = Sjs(   "com.github.japgolly.scalajs-react"                   ,    "core"                                  , version.scalaJsReact               )
+    val             scalaReactExtra   = Sjs(   "com.github.japgolly.scalajs-react"                   ,    "extra"                                 , version.scalaJsReact               )
+    val                scalaReact72   = Sjs(   "com.github.japgolly.scalajs-react"                   ,    "ext-scalaz72"                          , version.scalaJsReact               )
+    val              scalaReactExtm   = Sjs(   "com.github.japgolly.scalajs-react"                   ,    "ext-monocle"                           , version.scalaJsReact               )
+    val                scalaCssCore   = Sjs(   "com.github.japgolly.scalacss"                        ,    "core"                                  , version.scalaCss                   )
+    val                scalaCssExtR   = Sjs(   "com.github.japgolly.scalacss"                        ,    "ext-react"                             , version.scalaCss                   )
+    val                     videojs   = Sjs(   "com.github.karasiq"                                  ,    "scalajs-videojs"                       , version.scalaJsVideo               )
+    val                    markeSjs   = Sjs(   "com.github.karasiq"                                  ,    "scalajs-marked"                        , version.scalajsMarked              )
+    val                    momentjs   = Sjs(   "io.github.widok"                                     ,    "scala-js-momentjs"                     , version.scalajsMoment              )
+    val                   bindingJs   = Sjs(   "org.denigma"                                         ,    "binding"                               , version.scalaJsBinding             )
+    val                 scaladgetjs   = Sjs(   "fr.iscpif"                                           ,    "scaladget"                             , version.scaladget                  )
+    val                 reactocomps   = Sjs(   "com.github.chandu0101.scalajs-react-components"      ,    "core"                                  , version.reactComps                 )
+    
   }
 
   private object version {
